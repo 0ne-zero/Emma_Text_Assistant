@@ -19,7 +19,6 @@ from hashlib import sha256
 from io import BytesIO
 from threading import Thread
 from os import path
-from time import sleep
 from gtts import gTTS
 from datetime import datetime
 from langid import classify

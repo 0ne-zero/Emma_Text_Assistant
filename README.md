@@ -23,18 +23,19 @@ Of course, it still can not work with voice and uses text as input.
 
 ## Setup
 Dependencies are available in [here](https://github.com/0ne-zero/Emma_Audio_Assistant/blob/main/requirements.txt)
+'''
 $ git clone https://github.com/0ne-zero/Emma_Audio_Assistant
 $ cd ./Emma_Audio_Assistant/
 $ source venv/bin/activate
 $ python3 emma_core/emma.py
-
+'''
 
 ## Project Status
 Project is: _in progress_ 
 
 
 ## Acknowledgements
-- This project was inspired by [JELVIS] (https://github.com/kiahamedi/JELVIS)
+- This project was inspired by [JELVIS](https://github.com/kiahamedi/JELVIS)
 
 
 ## Contact

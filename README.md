@@ -23,15 +23,15 @@ Of course, it still can not work with voice and uses text as input.
 
 ## Setup
 Dependencies are available in [here](https://github.com/0ne-zero/Emma_Audio_Assistant/blob/main/requirements.txt).
+
 If you want to test this project run these commands:
 
-'''bash
+```bash
 $ git clone https://github.com/0ne-zero/Emma_Audio_Assistant
-
 $ cd ./Emma_Audio_Assistant/
 $ source venv/bin/activate
 $ python3 emma_core/emma.py
-'''
+```
 
 ## Project Status
 Project is: _in progress_ 

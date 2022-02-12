@@ -1,0 +1,17 @@
+<aiml version="1.0.1" encoding="UTF-8">
+
+    <!-- Category is an atomic AIML unit -->
+    <category>
+
+        <!-- Pattern to match in user input -->
+        <pattern>LOAD AIML</pattern>
+
+        <!-- Template is the response to the pattern -->
+        <!-- This learn an aiml file -->
+        <template>
+            <learn>*.aiml</learn>
+        </template>
+        
+    </category>
+
+</aiml>

@@ -1,0 +1,2 @@
+- Use logging ability
+- Add say_quote manipulator

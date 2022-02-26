@@ -27,7 +27,14 @@ class Checkers:
             if input.startswith(item):
                 return True
         return False
-
+        
+    @staticmethod
+    def say_quote_checker(input:str):
+        say_quote_keywords = ('say quote','give me a quote','give me a quote','say a quote')
+        for item in say_quote_keywords:
+            if input.startswith(item):
+                return True
+        return False
     @staticmethod
     def run_checker(input: str):
         run_keywords = ('start', 'start yourself', 'please start yourself',
@@ -132,7 +139,7 @@ class Checkers:
         return False
 
     def command_mode_checker(input:str):
-        command_mode_checker = ('command mode','go to command mode','goto command mode')
+        command_mode_checker = ('command mode','go to command mode','goto command mode','cmd')
         for item in command_mode_checker:
             if input == item:
                 return True

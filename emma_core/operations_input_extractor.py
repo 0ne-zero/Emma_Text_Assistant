@@ -1,6 +1,7 @@
 from multiprocessing.spawn import import_main_path
 from platform import system as system_name
 from subprocess import getoutput
+from wsgiref.validate import InputWrapper
 
 
 class OperationInputManipulation():
@@ -80,7 +81,7 @@ class OperationInputManipulation():
         inputs = {'name': '', 'location': ''}
         # detect location of directory
         location_words = input.rsplit(" in ", 1)[1].split()
-        
+
         # if user didn't give directory location this variable will be True
         location_is_here = False
 
@@ -92,7 +93,7 @@ class OperationInputManipulation():
                 if system_name() == "Linux":
                     # ls /
                     root_directories = getoutput('ls /').splitlines()
-                    
+
                     if location_words[0] in root_directories:
                         location_words[0] = f"/{location_words[0]}"
 
@@ -101,18 +102,20 @@ class OperationInputManipulation():
                     for word in location_words:
                         if counter == 0:
                             inputs['location'] += word
-                        else:   
+                        else:
                             inputs['location'] += f"/{word}"
                         counter += 1
                 elif system_name() == "Windows":
                     # get drives
-                    drives_list = getoutput('wmic logicaldisk get name').splitlines()
+                    drives_list = getoutput(
+                        'wmic logicaldisk get name').splitlines()
 
                     # if "Name" is in the output, remove it
                     # and remove ":" character from all input
                     for i in range(0, len(drives_list)):
                         # remove ":"
-                        drives_list[i] = drives_list[i].replace(':', '').strip()
+                        drives_list[i] = drives_list[i].replace(
+                            ':', '').strip()
                         # remove "Name"
                         if drives_list[i] == "Name":
                             del drives_list[i]
@@ -146,12 +149,47 @@ class OperationInputManipulation():
                 input = input.replace(additional, '')
 
         return input.strip()
+
     @staticmethod
-    def show_datetime_input_manipulator(input:str):
+    def show_datetime_input_manipulator(input: str):
         pass
+
     @staticmethod
     def aiml_response_input_manipulator(input: str):
         return input.strip()
+
+    @staticmethod
+    def say_quote_input_manipulator(input: str):
+        # If user wants all authors of quotes
+        all_authors_keywords = ('all quotes authors',
+                                'give me all quotes authors')
+        for item in all_authors_keywords:
+            if item == input:
+                return {'all_authors': True}
+        # If user wants all quotes
+        all_quotes_keywords = (
+            'all qoutes', 'give me all quotes', 'give me all quotes you have')
+        for item in all_quotes_keywords:
+            if item == input:
+                return {'all_quotes': True}
+
+        # If user wants to get quote(quotes) from a genre or an author
+        result = {'author': '', 'genre': ''}
+
+        # Input words
+        input_words = input.split()
+
+        # Find author name in input
+        for i in range(len(input_words)):
+            if input_words[i].lower() == 'from':
+                result['author'] = str(input_words[i+1])
+
+        # Find genre name in input
+        for i in range(len(input_words)):
+            if input_words[i].lower() == 'genre':
+                result['genre'] = str(input_words[i - 1])
+
+        return result
 
     def change_speaking_language_input_manipulator(input: str):
         additionals_start = ('change language to', 'change your language to')

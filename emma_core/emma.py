@@ -1,30 +1,34 @@
 #!/usr/bin/env python3
 
 import re
-from subprocess import getoutput, getstatusoutput
 import requests
-import gtts
-import speech_recognition as sr
-import pyttsx3
 import datetime
-import wikipedia
-import webbrowser
 import os
-import aiml
-import playsound
 import logging
-import utilities
-
+from subprocess import getoutput, getstatusoutput
+from platform import system as os_name
+from inspect import getfullargspec
+from threading import Thread
 from hashlib import sha256
 from io import BytesIO
-from threading import Thread
 from os import path
-from gtts import gTTS
+from colorama import Fore,Style
+
+
+import gtts
+import webbrowser
+import playsound
+import utilities
+import aiml
+import pyttsx3
+import wikipedia
+import speech_recognition as sr
+from googletrans import Translator
 from datetime import datetime
 from langid import classify
-from googletrans import Translator
-from inspect import getfullargspec
-from platform import system as os_name
+from gtts import gTTS
+
+
 
 from modes import Modes
 from operations_checkers import Checkers
@@ -37,7 +41,8 @@ class Emma:
 
     def __init__(self, brain_file="brain.brn",
                  learn_files=['learn.aiml', ], commands=['LOAD AIML', ],
-                 chdir='aiml', save_log=True, log_file_location='/var/log/emma/', logger_lowest_level='DEBUG') -> None:
+                 chdir='aiml', save_log=True, log_file_location='/var/log/emma/',
+                 logger_lowest_level='DEBUG',use_thread=False) -> None:
 
         # test
         log_file_location = './log/logfile.txt'
@@ -86,6 +91,9 @@ class Emma:
         Thread(target=self.__bootstraping_aiml_kernel, args=(
             brain_file, learn_files, commands, chdir)).start()
 
+        # set aiml kernel name
+        self.__aiml_kernel.setBotPredicate('name', 'Emma')
+
         # infity thread
         infity_thread = Thread(target=self.__infity_loop, args=()).start()
 
@@ -106,9 +114,11 @@ class Emma:
         '''
         self.__backslash = "\ ".strip()
 
+
         self.__save_log = save_log
         self.__logger: logging = self.__bootstraping_logger(
             log_file_location)
+        self.__use_thread = use_thread
         self.__speak_lang = 'en'
         self.__ping_counter = 0
         self.__number_of_operations_performed = 0
@@ -336,7 +346,7 @@ class Emma:
                 self.__output['lang'] = self.__speak_lang
                 return f'Speak language changed to {capitalized_language}.'
 
-    def speak_gtts(self,text: str, lang: str):
+    def speak_gtts(self, text: str, lang: str):
         '''speak by google text to speech service/api (online)'''
 
         '''Google support only 100 character in a request.\
@@ -413,7 +423,8 @@ class Emma:
 
         return self.__aiml_kernel.respond(input)
 
-    def say_quote(author='', genre='', limit=1, all_quotes=False, all_authors=False):
+    @__is_need_internet_connection()
+    def say_quote(self,author='', genre='', limit=1, all_quotes=False, all_authors=False):
         '''
         Return a quote by parameter.
         Parameter:
@@ -504,7 +515,7 @@ class Emma:
             full_url = full_url + f'author={author}&'
         if genre != '':
             full_url = full_url + f'genre={genre}'
-
+        full_url += f'&limit={limit}'
         result, number_quotes = get_quotes(full_url)
 
         # Add number of quotes in result
@@ -697,7 +708,7 @@ class Emma:
 
             if type(operation_inputs) == dict:
                 # Fill Emma speak language, if selected
-                if operation_inputs['lang']:
+                if 'lang' in operation_inputs.keys():
                     for lang, lang_code in gtts.tts.tts_langs().items():
                         if operation_inputs['lang'] == lang or operation_inputs['lang'] == lang_code:
                             self.__output['lang'] = operation_inputs['lang']
@@ -724,7 +735,8 @@ class Emma:
 
     def __output_processing(self):
         # Capitalize
-        output_text = utilities.upper_first_letter(str(self.__output['text']))
+        output_text = utilities.upper_first_letter(
+            str(self.__output['text'])) if len(str(self.__output['text'])) > 0 else ''
         output_lang = self.__output['lang']
         # Print output
         print("Emma : " + output_text)
@@ -736,7 +748,8 @@ class Emma:
 
             # The name of the voice files is sha256 their text and language code (with .mp3)
             # sha256 of output text and output lang
-            output_sha256 = sha256(str(output_text+output_lang).encode()).hexdigest()
+            output_sha256 = sha256(
+                str(output_text+output_lang).encode()).hexdigest()
 
             output_filename = f'{output_sha256}.mp3'
 
@@ -765,9 +778,14 @@ class Emma:
             user_name = getoutput('whoami')
             device_name = getoutput('hostname')
             pwd = getoutput('pwd')
-            shell_symbols = f"{user_name}@{device_name}:{pwd}$ "
+            
+            # Colored shell symbols and in the end of string reset color to normal
+            shell_symbols = f"{Fore.LIGHTGREEN_EX}{user_name}@{device_name}:{Fore.LIGHTBLUE_EX}{pwd}{Style.RESET_ALL}$ "
+            
             # Get command
             cmd = input(shell_symbols)
+
+
             out_words = ('come out from command mode',
                          'go to normal mode', 'goto normal mode')
             if cmd in out_words:
@@ -781,54 +799,60 @@ class Emma:
             self.__after_processing()
 
     def __ready_mode_processing(self):
-        '''Processing ready mode stuff'''
-        # Get input
-        self.__input['text'] = input('You: ')
+        '''
+        Processing ready mode stuff.
+        This method needs self.input['text'] as input, so that variable should been fill.
+        '''
         self.__mode = Modes.processing
-        
+
         # Input processing ----- select appropriate operation and extract required inputs
         # operaion_attributes has "operation,operation_inputs,required_internet"
         operation_attributes = self.__input_processing(
             self.__input['text'])
-        
+
         # Wait for check internet connection done at least, one time
         while self.__infity_loop_worked == False:
             pass
-        
+
         # Perform selected operation
         self.__perform_operation(operation_attributes)
-        
+
         # Output processing
         self.__output_processing()
 
         # Cleaning and logging,etc
         self.__after_processing()
-        self.__mode = Modes.ready
+
+    def __stop_mode_processing(self):
+        # If user want to start Emma
+        if Checkers.run_checker(self.__input['text']):
+            self.__output['text'] = self.run()
+        # Tell user i stopped
+        else:
+            self.__output['text'] = "I'm stopped, please first run me.\nYou can do it by say \"Run\". "
+        # Process stop mode output
+        self.__output_processing()
 
     def processing(self):
         '''Input processing and performing the input request and display the final output'''
 
+
+        
+
         if self.__mode != Modes.stopped:
-            
             # Command mode
             if self.__mode == Modes.command:
                 self.__command_mode_processing()
             # Ready mode
             elif self.__mode == Modes.ready:
+                # Get input
+                self.__input['text'] = input('You: ')
                 self.__ready_mode_processing()
         # Stop mode
         else:
-            # If user want to start Emma
-            if Checkers.run_checker(self.__input['text']):
-                self.__output['text'] = self.run()
-            # Tell user i stopped
-            else:
-                self.__output['text'] = "I'm stopped, please first run me.\nYou can do it by say \"Run\". "
-            # Process stop mode output
-            self.__output_processing()
-        
-        
-    # endregion
+            # Get input
+            self.__input['text'] = input('You: ')
+            self.__stop_mode_processing()
 
 
 emma = Emma()

@@ -24,7 +24,7 @@ Of course, it still can not work with voice and uses text as input.
 
 ## Screenshot
 - Emma can tell jokes:
-- <img src="https://github.com/0ne-zero/Emma_Audio_Assistant/blob/main/screenshot/Screenshot%20from%202022-02-28%2015-04-40-cleaned.png" width=80% height=60%>
+- <img src="https://github.com/0ne-zero/Emma_Audio_Assistant/blob/main/screenshot/Screenshot%20from%202022-02-28%2015-04-40-cleaned.png" width=80% height=80%>
 - You see, That's fun (:
 
 ## Setup

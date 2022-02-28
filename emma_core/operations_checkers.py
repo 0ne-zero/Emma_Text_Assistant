@@ -27,7 +27,15 @@ class Checkers:
             if input.startswith(item):
                 return True
         return False
-        
+    
+    @staticmethod
+    def tell_joke_checker(input:str):
+        tell_joke_keywords = ('tell me a joke','tell me joke','tell joke','tell a joke','say a joke','say joke')
+        for item in tell_joke_keywords:
+            if input.startswith(item):
+                return True
+        return False
+
     @staticmethod
     def say_quote_checker(input:str):
         say_quote_keywords = ('say quote','give me a quote','give me a quote','say a quote')

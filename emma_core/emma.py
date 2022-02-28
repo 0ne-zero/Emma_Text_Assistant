@@ -27,13 +27,13 @@ from googletrans import Translator
 from datetime import datetime
 from langid import classify
 from gtts import gTTS
+from jokeapi import Jokes
 
 
 
 from modes import Modes
 from operations_checkers import Checkers
 from operations_input_extractor import OperationInputManipulation
-
 
 class Emma:
 
@@ -213,14 +213,16 @@ class Emma:
         '''internet connection checking'''
 
         status = True
-        g_ping = os.system('ping4 -c 1 google.com > /dev/null 2>&1')
+        g_ping = os.system('ping -c 1 google.com > /dev/null 2>&1')
         if g_ping != 0:
-            y_ping = os.system('ping4 -c 1 yahoo.com > /dev/null 2>&1')
+            y_ping = os.system('ping -c 1 yahoo.com > /dev/null 2>&1')
             if y_ping != 0:
-                status = False
+                g_dns = os.system('ping -c 1 8.8.8.8 > /dev/null 2>&1')
+                if g_dns != 0:
+                    status = False
 
         self.__internet_connection = status
-
+    
     def __infity_loop(self):
         '''this mehtod is a loop for check things (like internet connection)'''
         while 1:
@@ -236,6 +238,21 @@ class Emma:
     # endregion
 
     # region public methods
+
+    def tell_joke(self,language='',category:str=''):
+        joke = ''
+        j =  Jokes()
+        if category != '':
+            data = j.get_joke(category=[category,],lang=language)
+        else:
+            data = j.get_joke(lang=language)
+        try:
+            joke = data['joke']
+        except:
+            joke = data['setup'] + '\n'
+            joke += data['delivery']
+        return joke
+        
 
     @classmethod
     def instance_count(cls):
@@ -822,6 +839,8 @@ class Emma:
 
         # Cleaning and logging,etc
         self.__after_processing()
+        if self.__mode != Modes.command:
+            self.__mode = Modes.ready
 
     def __stop_mode_processing(self):
         # If user want to start Emma
@@ -832,12 +851,10 @@ class Emma:
             self.__output['text'] = "I'm stopped, please first run me.\nYou can do it by say \"Run\". "
         # Process stop mode output
         self.__output_processing()
+        
 
     def processing(self):
         '''Input processing and performing the input request and display the final output'''
-
-
-        
 
         if self.__mode != Modes.stopped:
             # Command mode

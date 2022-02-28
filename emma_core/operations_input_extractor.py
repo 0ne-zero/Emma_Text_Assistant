@@ -1,8 +1,8 @@
-from multiprocessing.spawn import import_main_path
 from platform import system as system_name
 from subprocess import getoutput
-from wsgiref.validate import InputWrapper
+from gtts.tts import tts_langs
 
+import utilities
 
 class OperationInputManipulation():
 
@@ -191,6 +191,45 @@ class OperationInputManipulation():
 
         return result
 
+    def tell_joke_input_manipulator(input:str):
+        
+        input = input.lower()
+        
+        # Lang should be lang code like: 'en'
+        # lang is for Emma to change her voice to lang
+        # language is for tell_joke function
+        result = {'lang':'','category':'','language':''}
+
+        # I except the last word be a language 
+        supported_langs = tts_langs()
+        supported_categories = ('misc','programming','dark','pun','spooky','christmas')
+        input_words = input.split()
+        
+        lang = ''
+
+        # Find language and category of joke from input
+        for i in range(len(input_words)):
+            # Language
+            if input_words[i] == 'language':
+                lang = input_words[i-1]
+            # Category
+            if input_words[i] == 'category':
+                category = input_words[i-1]
+                if category in supported_categories:
+                    result['category'] = category
+        
+        # validate selected language
+        if lang in supported_langs.keys():
+            result['lang'] = lang
+            result['language'] = result['lang']
+        elif lang.capitalize() in supported_langs.values():
+            result['lang'] = utilities.get_key_by_value(lang,supported_langs)
+            result['language'] = result['lang']
+
+        return result
+
+
+
     def change_speaking_language_input_manipulator(input: str):
         additionals_start = ('change language to', 'change your language to')
         for item in additionals_start:
@@ -205,6 +244,3 @@ class OperationInputManipulation():
         input_manipulator_func = eval(
             f'OperationInputManipulation.{operation_name}_input_manipulator')
         return input_manipulator_func
-
-
-0

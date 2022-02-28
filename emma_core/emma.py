@@ -241,16 +241,21 @@ class Emma:
 
     def tell_joke(self,language='',category:str=''):
         joke = ''
+        
         j =  Jokes()
         if category != '':
-            data = j.get_joke(category=[category,],lang=language)
+            data = j.get_joke(category=[category,],lang=language,search_string="Why do python programmers wear")
         else:
             data = j.get_joke(lang=language)
-        try:
-            joke = data['joke']
-        except:
-            joke = data['setup'] + '\n'
-            joke += data['delivery']
+        if data['error'] == False:
+            try:
+                joke = data['joke']
+            except:
+                joke = data['setup'] + '\n'
+                joke += data['delivery']
+        else:
+            return data['message']
+        
         return joke
         
 

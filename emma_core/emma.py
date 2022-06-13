@@ -244,7 +244,7 @@ class Emma:
         
         j =  Jokes()
         if category != '':
-            data = j.get_joke(category=[category,],lang=language,search_string="Why do python programmers wear")
+            data = j.get_joke(category=[category,],lang=language)
         else:
             data = j.get_joke(lang=language)
         if data['error'] == False:

@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 
+import platform
 import re
 import requests
 import datetime
 import os
 import logging
 from subprocess import getoutput, getstatusoutput
-from platform import system as __os_name
 from inspect import getfullargspec
 from threading import Thread
 from hashlib import sha256
@@ -126,7 +126,7 @@ class Emma:
         self.__aiml_kernel_loaded = False
         self.__ping_counter = 0
         self.__running = True
-        self.__os_name = __os_name()
+        self.__os_name = self.get_os_name()
         self.__internet_connection: bool = False
         self.__mode: Modes = Modes.ready
         self.__input: dict = {"text": "", "lang": ""}
@@ -238,6 +238,11 @@ class Emma:
     # endregion
 
     # region public methods
+    def get_os_name(self):
+        ''' Returns device os name'''
+        return platform.system()
+    
+
 
     def tell_joke(self,language='',category:str=''):
         joke = ''
@@ -654,9 +659,11 @@ class Emma:
     def listen(self):
         '''listen from microphone for get input/command for execute'''
         self.__mode = Modes.listening
-
         r = sr.Recognizer()
-        with sr.Microphone() as source:
+
+        with sr.Microphone(sample_rate=48000,chunk_size=1024) as source:
+            r.adjust_for_ambient_noise(source,duration=3)
+            print("I'm listening...")
             audio = r.listen(source)
 
         if self.__internet_connection:
@@ -868,9 +875,12 @@ class Emma:
             # Ready mode
             elif self.__mode == Modes.ready:
                 # Get text input
-                self.__input['text'] = input('You: ')
+                #self.__input['text'] = input('You: ')
+
+                
                 # Get audio input
-                #self.__input['text'],self.__input['lang'] = self.listen()
+                self.__input['text'],self.__input['lang'] = self.listen()
+                
                 self.__ready_mode_processing()
         # Stop mode
         else:

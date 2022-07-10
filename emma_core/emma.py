@@ -6,7 +6,7 @@ import datetime
 import os
 import logging
 from subprocess import getoutput, getstatusoutput
-from platform import system as os_name
+from platform import system as __os_name
 from inspect import getfullargspec
 from threading import Thread
 from hashlib import sha256
@@ -126,7 +126,7 @@ class Emma:
         self.__aiml_kernel_loaded = False
         self.__ping_counter = 0
         self.__running = True
-        self.__os_name = os_name()
+        self.__os_name = __os_name()
         self.__internet_connection: bool = False
         self.__mode: Modes = Modes.ready
         self.__input: dict = {"text": "", "lang": ""}
@@ -414,9 +414,9 @@ class Emma:
             pyttsx3_engine.say(text)
             pyttsx3_engine.runAndWait()
         except:
-            if self.os_name == "Linux":
+            if self.__os_name == "Linux":
                 os.system('sudo apt install espeak')
-            elif self.os_name == "Windows":
+            elif self.__os_name == "Windows":
                 print("Sorry, I can't speak because you are not connect to the internet.\nIf you want i can speak without internet connection please install \"espeak\" that help me to talk to you when you are offline.")
 
     @__is_need_internet_connection()
@@ -589,9 +589,9 @@ class Emma:
 
     def shutdown_system(self):
         '''shutdowning system'''
-        if self.os_name == "Linux":
+        if self.__os_name == "Linux":
             os.system('shutdown -h 60')
-        elif self.os_name == "Windows":
+        elif self.__os_name == "Windows":
             os.system("shutdown /s /t 60")
         else:
             return "i don't support this operating system"
@@ -627,9 +627,9 @@ class Emma:
 
     def cancel_shutdowning_system(self):
         '''cancel shutdowning system'''
-        if self.os_name == "Linux":
+        if self.__os_name == "Linux":
             os.system('shutdown -c')
-        elif self.os_name == "Windows":
+        elif self.__os_name == "Windows":
             os.system('shutdown -a')
         else:
             return "i don't support this operating system"
@@ -638,9 +638,9 @@ class Emma:
 
     def reboot_system(self):
         '''rebooting system'''
-        if self.os_name == "Linux":
+        if self.__os_name == "Linux":
             os.system('shutdown -r 60')
-        elif self.os_name == "Windows":
+        elif self.__os_name == "Windows":
             os.system("shutdown -r -f -t 60 ")
 
         return "system will be reboot in 60 second"
@@ -860,15 +860,17 @@ class Emma:
 
     def processing(self):
         '''Input processing and performing the input request and display the final output'''
-
+        
         if self.__mode != Modes.stopped:
             # Command mode
             if self.__mode == Modes.command:
                 self.__command_mode_processing()
             # Ready mode
             elif self.__mode == Modes.ready:
-                # Get input
+                # Get text input
                 self.__input['text'] = input('You: ')
+                # Get audio input
+                #self.__input['text'],self.__input['lang'] = self.listen()
                 self.__ready_mode_processing()
         # Stop mode
         else:

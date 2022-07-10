@@ -1,4 +1,4 @@
-#!/home/me/python_programs/Emma_Audio_Assistant/venv/bin/python3
+#!/home/me/code/github/Emma_Audio_Assistant/venv/bin/python
 # -*- coding: utf-8 -*-
 import argparse
 import sys

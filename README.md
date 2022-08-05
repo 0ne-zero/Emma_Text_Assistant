@@ -41,6 +41,7 @@ $ python3 emma_core/emma.py
 
 ## Project Status
 - Project is: _in progress_ 
+- UNSTABLE AS *HELL*
 
 
 ## Acknowledgements

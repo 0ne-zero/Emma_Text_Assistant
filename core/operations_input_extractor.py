@@ -2,20 +2,19 @@ from platform import system as system_name
 from subprocess import getoutput
 from gtts.tts import tts_langs
 
-import utilities
-
-class OperationInputManipulation():
+from core import utilities
+class OperationInputExtractor():
 
     @staticmethod
     def search_in_web_input_manipulator(input: str):
         # input manipulation
         additionals_start = ('browse', 'search', 'google')
-        additional_end = ('in web', 'in google')
+        additionals_end = ('in web', 'in google')
         for additional in additionals_start:
             if input.startswith(additional):
                 input = input.replace(additional, '')
 
-        for additional in additional_end:
+        for additional in additionals_end:
             if input.endswith(additional):
                 input = input.replace(additional, '')
 

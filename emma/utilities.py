@@ -1,3 +1,7 @@
+from ast import arg
+from hashlib import sha256
+
+
 def get_key_by_value(value:str, dictionary:dict):
     if type(dictionary) == dict:
         for k in dictionary.keys():
@@ -63,7 +67,12 @@ def convert_words_list_to_sentence(words_list: list):
             index += 1
     return sentence
 
-
+def generate_hash_sha256(*args:str):
+    input = ''
+    for item in args:
+        input += item.encode('utf-8')
+    
+    return sha256(input.encode('utf-8')).hexdigest()
 def get_sentences(text:str):
     """Split the string s into a list of sentences."""
     if not (isinstance(text,str)):

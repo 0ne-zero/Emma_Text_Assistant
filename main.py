@@ -1,21 +1,35 @@
-from operator import truediv
-# e = core.emma.Emma()
-# while 1:
-#     e.processing()
+import threading
+import time
 
 
-class O():
-    def o(self):
-        return 'o'
-    def e(self):
-        print(self.ev)
-class E(O):
-    def __init__(self) -> None:
-        self.ov = super().o()
-        self.e()
-        self.ev ='e'
+def mythread():
+    time.sleep(1000)
 
-    def print_o(self):
-        print(self.o)
-e = E()
-e.print_o()
+
+def main():
+    threads = 0  # thread counter
+    y = 1000000  # a MILLION of 'em!
+    for i in range(y):
+        try:
+            x = threading.Thread(target=mythread, daemon=True)
+            threads += 1  # thread counter
+            print(threads)
+            x.start()  # start each thread
+        except RuntimeError:  # too many throws a RuntimeError
+            break
+    print("{} threads created.\n".format(threads))
+
+
+if __name__ == "__main__":
+    main()
+
+    def __stop_mode_processing(self):
+        # If user want to start Emma
+        # if Checkers.run_checker(self.__input['text']):
+        #    self.__output['text'] = self.run()
+        # # Tell user i stopped
+        # else:
+        #     self.__output['text'] = "I'm stopped, please first run me.\nYou can do it by say \"Run\". "
+        # # Process stop mode output
+        # self.__output_processing()
+        pass

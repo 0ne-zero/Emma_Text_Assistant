@@ -14,8 +14,7 @@
 
 ## General Information
 - Let me admit that I am lazy. So I decided to make a simple voice assistant using Python.
-Of course, it still can not work with voice and uses text as input.
-(Honestly, I don't have a microphone)
+Of course, it still can not work with voice and uses text as input. In theory, it should have done it, But in my system, I saddly have driver issues with my microphone, so I can't test it correctly.
 - For now, Emma can do just basic tasks.
 
 

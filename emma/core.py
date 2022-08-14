@@ -98,12 +98,13 @@ class Core():
         if use_thread:
             Thread(target=self.__bootstraping_aiml_kernel, args=(
                 aiml_brain_file, aiml_learn_files, aiml_commands)).start()
+            Thread(target=self.__infity_loop, args=()).start()
         else:
             self.__bootstraping_aiml_kernel(
                 aiml_brain_file, aiml_learn_files, aiml_commands)
-
+            self.__infity_loop(break_after=1)
         # Infity thread
-        Thread(target=self.__infity_loop, args=()).start()
+
 
         self.global_vars.set('__os_name',system())
         self.global_vars.set('__using_thread', use_thread)
@@ -162,14 +163,28 @@ class Core():
 
         self.global_vars.set('__internet_connection', status)
 
-    def __infity_loop(self):
-        '''this mehtod is a loop for check things (like internet connection)'''
-        while 1:
-            self.__check_internet_connection()
-            self.ping_counter += 1
-            if self.ping_counter == 1:
-                self.infity_loop_worked = True
-            sleep(0.4)
+    def __infity_loop(self,break_after=0):
+        '''
+        this mehtod is a loop for check things (like internet connection
+        infinity loop; if break_after is none-zero it will break loop after the number of break_after runed.
+        '''
+
+        if break_after == 0:
+            while 1:
+                self.__check_internet_connection()
+                self.ping_counter += 1
+                if self.ping_counter == 1:
+                    self.infity_loop_worked = True
+                sleep(0.4)
+        else:
+            runed_count = 0
+            while runed_count <= break_after:
+                self.__check_internet_connection()
+                self.ping_counter += 1
+                if self.ping_counter == 1:
+                    self.infity_loop_worked = True
+                sleep(0.4)
+                runed_count += 1
 
     def __speak_gtts(self, text: str, lang: str):
         '''Get audio from google text to speech api and save it in local disk and play it'''

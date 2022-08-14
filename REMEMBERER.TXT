@@ -1,2 +1,3 @@
 - create two instance and let speak with each other
 - write a lot of comments for everything
+- look at the inits variables

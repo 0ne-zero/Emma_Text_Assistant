@@ -1,13 +1,17 @@
+from __future__ import nested_scopes
 from abc import ABC, abstractmethod
 import ast
 import datetime
 import os
-from platform import platform
+from platform import system as get_os_name
+from random import randint
+import random
 from time import sleep
 from subprocess import getoutput
 import webbrowser
 
 import requests
+import distro
 import datetime
 import os
 from subprocess import getoutput, getstatusoutput
@@ -20,14 +24,11 @@ from datetime import datetime
 from langid import classify
 from jokeapi import Jokes
 
-from globals import GET_GLOBAL_VARS
 
-INITIATED = False
-
-def __all_operations():
+def all_operations():
     parsed = ast.parse(open(__file__).read())
     # all operations are class
-    classes = [c for c in parsed.body if isinstance(c,ast.ClassDef)]
+    classes = [c for c in parsed.body if isinstance(c, ast.ClassDef)]
     operations_class = []
     for c in classes:
         if c.bases[0].id == "IOperation":
@@ -35,16 +36,28 @@ def __all_operations():
                 globals()[c.name]
             )
     return operations_class
+
+
+def __needs_core(cls):
+    '''
+    ALL OPERATIONS THAT NEED CORE SHOULD SHOULD HAVE "core" ARGUMENT IN THEIR "action" FUNCTION
+    decorator for operations need to core (core class)
+    '''
+    cls.need_core = True
+    return cls
+
+
 def __needs_internet_connection(cls):
-    '''decorator for functions needs to internet connection, with this decorator, they can be recognized'''
+    '''decorator for operations need to internet connection, with this decorator, they can be recognized'''
     cls.need_internet = True
     return cls
 
 
 def __needs_input(cls):
-    '''decorator for functions needs to input for their action'''
+    '''decorator for operations need to input for their action'''
     cls.need_input = True
     return cls
+
 
 class IOperation(ABC):
     @abstractmethod
@@ -71,39 +84,46 @@ class IOperation(ABC):
         self.input_extracted = True
 
     def __before_action_validate(self):
-        if hasattr(type(self),'need_input'):
+        if hasattr(type(self), 'need_input'):
             if type(self).need_input == True:
                 if not self.__is_input_extracted():
-                    raise Exception("You should call input_extractor before action")
+                    raise Exception(
+                        "You should call input_extractor before action")
 
+
+@__needs_core
 @__needs_input
 class AIMLResponse(IOperation):
-    def action(self):
+    def action(self, core):
         '''get aiml response by a input'''
         super().action()
 
         # If aiml not loaded print a waiting messages
-        is_kerenl_laoded = GET_GLOBAL_VARS().get('__is_aiml_kernel_loaded')
+        is_kerenl_laoded = core.get_global_var('__is_aiml_kernel_loaded')
         # Get is_kernel_loaded till it's don't be None (None means doesn't exists, atleast yet)
-        while is_kerenl_laoded == None:
-            is_kerenl_laoded = GET_GLOBAL_VARS().get('__is_aiml_kernel_loaded')
+        count = 0
+        while is_kerenl_laoded == None or is_kerenl_laoded == False:
+            count += 1
+            if count == 1:
+                print("\nPlease wait few soconds to load aiml kernel")
+            is_kerenl_laoded = core.get_global_var('__is_aiml_kernel_loaded')
             sleep(0.2)
-        if is_kerenl_laoded == False:
-            print("\nPlease wait few soconds to load aiml kernel")
-        # Wait to load aiml kernel
-        while is_kerenl_laoded == False:
-            sleep(0.2)
-            
-        kernel = GET_GLOBAL_VARS().get("__aiml_kernel")
+        del count
+
+        kernel = core.get_global_var("__aiml_kernel")
 
         return kernel.respond(self.text)
+
     @staticmethod
     def checker(input):
         # this is a special operation if rest of operations checker returns False this operation will be call by force
         return False
+
     def input_extractor(self, input):
         self.text = input
         self._set_input_extracted_true()
+
+
 @__needs_internet_connection
 @__needs_input
 class OpenWebsite(IOperation):
@@ -120,10 +140,10 @@ class OpenWebsite(IOperation):
         # run base class action first
         super().action()
         webbrowser.open_new_tab(self.website_url)
-        return f"{self.website_url} is open"
+        return f"{self.website_url} is openned"
 
     def input_extractor(self, input):
-        additionals_start = ('browse', 'search', 'google')
+        additionals_start = ('browse', 'open')
         input = input.replace('website', '')
         for additional in additionals_start:
             if input.startswith(additional):
@@ -134,13 +154,15 @@ class OpenWebsite(IOperation):
         self._set_input_extracted_true()
 
 
+@__needs_core
 class ShutDownSystem(IOperation):
-    def action(self):
+    def action(self, core):
         '''shutdowning system'''
         super().action()
-        if self.__os_name == "Linux":
-            os.system('shutdown -h 60')
-        elif self.__os_name == "Windows":
+        os_name = core.get_global_var('__os_name')
+        if os_name == "Linux":
+            os.system('shutdown -h 60 2 > /dev/null')
+        elif os_name == "Windows":
             os.system("shutdown /s /t 60")
         else:
             return "i don't support this operating system"
@@ -161,28 +183,30 @@ class ShutDownSystem(IOperation):
 
 
 @__needs_input
+@__needs_core
 class CreateDirectory(IOperation):
-    def action(self):
+    def action(self,core):
         super().action()
 
         result = False
         # putting slash or backslash in location if there is not
-        if not location == '':
-            if not location.endswith('/') or not location.endswith(self.__backslash):
-                if self.__os_name == "Linux":
-                    if not location.endswith('/'):
-                        location = location + "/"
-                elif self.__os_name == "Windows":
-                    if not location.endswith(self.__backslash):
-                        location = location + self.__backslash
+        back_slash = core.get_global_var("__backslash")
+        if not self.location == '':
+            if not self.location.endswith('/') or not self.location.endswith(back_slash):
+                if self.os_name == "Linux":
+                    if not self.location.endswith('/'):
+                        self.location = self.location + "/"
+                elif self.os_name == "Windows":
+                    if not self.location.endswith(back_slash):
+                        self.location = self.location + back_slash
 
         if self.name:
-            if location:
-                if self.__os_name == "Linux" or self.__os_name == "Windows":
+            if self.location:
+                if self.os_name == "Linux" or self.os_name == "Windows":
                     result = True if os.system(
                         f"mkdir {self.location+self.name}") == 0 else False
             else:
-                if self.__os_name == "Linux" or self.__os_name == "Windows":
+                if self.os_name == "Linux" or self.os_name == "Windows":
                     result = True if os.system(
                         f"mkdir {self.name}") == 0 else False
 
@@ -200,12 +224,13 @@ class CreateDirectory(IOperation):
         # if user didn't give directory location this variable will be True
         location_is_here = False
 
+        self.os_name = get_os_name()
         if len(location_words) > 0:
             if len(location_words) == 1:
                 if location_words[0] == 'here' or location_words[0] == 'Here':
                     location_is_here = True
             if location_is_here == False:
-                if platform() == "Linux":
+                if self.os_name == "Linux":
                     # ls /
                     root_directories = getoutput('ls /').splitlines()
 
@@ -220,7 +245,7 @@ class CreateDirectory(IOperation):
                         else:
                             inputs['location'] += f"/{word}"
                         counter += 1
-                elif platform() == "Windows":
+                elif self.os_name == "Windows":
                     # get drives
                     drives_list = getoutput(
                         'wmic logicaldisk get name').splitlines()
@@ -266,14 +291,15 @@ class CreateDirectory(IOperation):
                 return True
         return False
 
-
+@__needs_core
 class CancleShutdownSystem(IOperation):
-    def action(self):
+    def action(self,core):
         '''cancel shutdowning system'''
         super().action()
-        if self.__os_name == "Linux":
+        os_name = core.get_global_var("__os_name")
+        if os_name == "Linux":
             os.system('shutdown -c')
-        elif self.__os_name == "Windows":
+        elif os_name == "Windows":
             os.system('shutdown -a')
         else:
             return "i don't support this operating system"
@@ -293,11 +319,12 @@ class CancleShutdownSystem(IOperation):
         self._set_input_extracted_true()
 
 
+@__needs_core
 class GetOperatingSystemName(IOperation):
-    def action(self):
+    def action(self, core):
         ''' Returns device os name'''
         super().action()
-        return platform.system()
+        return f"Operating system name is: {core.get_global_var('__os_name')}"
 
     def checker(input):
         get_os_name_keywords = ('get os name', 'get operating system name')
@@ -311,13 +338,81 @@ class GetOperatingSystemName(IOperation):
         self._set_input_extracted_true()
 
 
+@__needs_core
+class GetDistributionName(IOperation):
+    def action(self, core):
+        super().action()
+        os_name = core.get_global_var('__os_name')
+        if os_name == "Windows":
+            return "This is a windows system"
+        elif os_name == "Linux":
+            return f"\nYour distribution name is: {distro.id()} {distro.name()}"
+
+    def checker(input):
+        get_distro_keywords = (
+            'get distro name', 'this is what kind of linux','get distribution name')
+        for item in get_distro_keywords:
+            if input == item:
+                return True
+        return False
+
+    def input_extractor(self, input):
+        self._set_input_extracted_true()
+
+@__needs_core
+class GetDistributionVersion(IOperation):
+    def action(self, core):
+        super().action()
+        os_name = core.get_global_var('__os_name')
+        if os_name == "Windows":
+            return "This is a windows system"
+        elif os_name == "Linux":
+            return f"Your distribution version is: {distro.version()}"
+
+    def checker(input):
+        get_distro_keywords = (
+            'get distro version','get distribution version'
+        )
+        for item in get_distro_keywords:
+            if input == item:
+                return True
+        return False
+
+    def input_extractor(self, input):
+        self._set_input_extracted_true()
+
+@__needs_core
+class GetDistributionInfo(IOperation):
+    def action(self, core):
+        super().action()
+        os_name = core.get_global_var('__os_name')
+        if os_name == "Windows":
+            return "This is a windows system"
+        elif os_name == "Linux":
+            return f"\nYour distribution name is: {distro.name()}\nYour distribution version is: {distro.version()}"
+
+    def checker(input):
+        get_distro_keywords = (
+            'this is what kind of linux','get distro info',
+            'get distribution information',
+            'get distribution info')
+        for item in get_distro_keywords:
+            if input == item:
+                return True
+        return False
+
+    def input_extractor(self, input):
+        self._set_input_extracted_true()
+
+@__needs_core
 class RebootSystem(IOperation):
-    def action(self):
+    def action(self,core):
         '''rebooting system'''
         super().action()
-        if self.__os_name == "Linux":
+        os_name = core.get_global_var("__os_name")
+        if os_name == "Linux":
             os.system('shutdown -r 60')
-        elif self.__os_name == "Windows":
+        elif os_name == "Windows":
             os.system("shutdown -r -f -t 60 ")
 
         return "system will be reboot in 60 second"
@@ -370,7 +465,7 @@ class SayJoke(IOperation):
         # Lang should be lang code like: 'en'
         # lang is for Emma to change her voice to lang
         # language is for tell_joke function
-        result = { 'category': '', 'language': ''}
+        result = {'category': '', 'language': ''}
 
         # I except the last word be a language
         supported_langs = tts_langs()
@@ -574,7 +669,7 @@ class DetectLanguage(IOperation):
 class ShowDate(IOperation):
     def action(self):
         super().action()
-        return f'date is {datetime.datetime.now().date()}'
+        return f'date is {datetime.now().date()}'
 
     def checker(input):
         show_date_keywords = ('what date is it',)
@@ -589,10 +684,11 @@ class ShowDate(IOperation):
 
 @__needs_input
 @__needs_internet_connection
+@__needs_core
 class Ping(IOperation):
-    def action(self):
+    def action(self,core):
         super().action()
-        param = '-n' if platform.system() == 'Windows' else '-c'
+        param = '-n' if core.get_global_var('__os_name') == 'Windows' else '-c'
         output = getoutput(f'ping {param} 1 {self.server}')
         return output
 
@@ -629,7 +725,7 @@ class ShowTime(IOperation):
 class ShowDateTime(IOperation):
     def action(self):
         super().action()
-        return f"datetime is {datetime.datetime.now()}"
+        return f"datetime is {datetime.now()}"
 
     @staticmethod
     def checker(input):
@@ -743,11 +839,12 @@ class SearchInWeb(IOperation):
 # Config global variables
 
 
+@__needs_core
 class InternetStatus(IOperation):
-    def action(self):
+    def action(self, core):
         '''show internet connection status'''
         super().action()
-        if GET_GLOBAL_VARS().get('__internet_connection') == True:
+        if core.get_global_var('__internet_connection') == True:
             return "You're connect to the internet"
         else:
             return "No internet connection"
@@ -764,12 +861,15 @@ class InternetStatus(IOperation):
         self._set_input_extracted_true()
 
 
+@__needs_input
+@__needs_internet_connection
 class TranslateGoogle(IOperation):
     def action(self):
         '''translate a text with google translation service/api (online)'''
         super().action()
         t = Translator()
         return t.translate(self.text, self.lang).text
+
     @staticmethod
     def checker(input):
         translate_google_keywords = ('translate',)
@@ -779,7 +879,7 @@ class TranslateGoogle(IOperation):
         return False
 
     def input_extractor(self, input):
-        inputs = {'text': '', 'lang':''}
+        inputs = {'text': '', 'lang': ''}
         # lang in this dictionary is Emma speak language
         try:
             from googletrans import LANGCODES
@@ -800,6 +900,7 @@ class TranslateGoogle(IOperation):
         self.lang = inputs['lang']
         self._set_input_extracted_true()
 
+
 @__needs_input
 class Cmd(IOperation):
     def action(self):
@@ -811,7 +912,6 @@ class Cmd(IOperation):
         else:
             return "The command input is empty."
 
-
     def checker(input):
         pass
 
@@ -820,7 +920,19 @@ class Cmd(IOperation):
         self._set_input_extracted_true()
 
 
+class IamStopped(IOperation):
+    def action(self):
+        '''Returns output that i'm stopped please change state'''
+        super().action()
+        outputs = (
+            "i'm stopped please change run me",
+            "i'm stopped please change the state",
+            "I'm in stop state first of all please change the state",)
+        return outputs[random.randrange(0, len(outputs))]
 
-if not INITIATED :
-    GET_GLOBAL_VARS().set('__all_operations',__all_operations())
-    INITIATED = True
+    def checker(input):
+        '''this operation only execute internal in stop state, so it's doesn't need to checker'''
+        return False
+
+    def input_extractor(self):
+        self._set_input_extracted_true()

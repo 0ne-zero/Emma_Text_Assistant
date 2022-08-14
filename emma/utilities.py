@@ -70,7 +70,7 @@ def convert_words_list_to_sentence(words_list: list):
 def generate_hash_sha256(*args:str):
     input = ''
     for item in args:
-        input += item.encode('utf-8')
+        input += str(item.encode('utf-8'))
     
     return sha256(input.encode('utf-8')).hexdigest()
 def get_sentences(text:str):

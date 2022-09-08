@@ -39,9 +39,7 @@ $ python3 emma_core/emma.py
 ```
 
 ## Project Status
-- Project is: _in progress_ 
-- UNSTABLE AS *HELL*
-
+- Project is: _in progress_
 
 ## Acknowledgements
 - This project was inspired by [JELVIS](https://githu[Ross.txt](https://github.com/0ne-zero/Emma_Audio_Assistant/files/8153087/Ross.txt).com/kiahamedi/JELVIS)

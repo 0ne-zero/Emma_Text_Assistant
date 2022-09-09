@@ -34,7 +34,9 @@ If you want to test this project run these commands:
 ```bash
 $ git clone https://github.com/0ne-zero/Emma_Audio_Assistant
 $ cd ./Emma_Audio_Assistant/
+$ virtualenv venv
 $ source venv/bin/activate
+$ pip install -r requirements.txt
 $ python3 emma_core/emma.py
 ```
 

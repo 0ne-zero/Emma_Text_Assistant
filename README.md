@@ -14,7 +14,7 @@
 
 ## General Information
 - Let me admit that I am lazy. So I decided to make a simple voice assistant using Python.
-Of course, it still can not work with voice and uses text as input. In theory, it should have done it, But in my system, I saddly have driver issues with my microphone, so I can't test it correctly.
+In theory, it should recognize voice, But in my system, I saddly have driver issues with my microphone, so I can't test it correctly.
 - For now, Emma can do just basic tasks.
 
 
@@ -27,9 +27,7 @@ Of course, it still can not work with voice and uses text as input. In theory, i
 - You see, That's fun (:
 
 ## Setup
-Dependencies are available in [here](https://github.com/0ne-zero/Emma_Audio_Assistant/blob/main/requirements.txt).
-
-If you want to test this project run these commands:
+- If you want to test this project run these commands:
 
 ```bash
 $ git clone https://github.com/0ne-zero/Emma_Audio_Assistant

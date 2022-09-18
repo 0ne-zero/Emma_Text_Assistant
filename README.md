@@ -42,7 +42,7 @@ $ python3   emma/assistant.py
 - Project is: _in progress_
 
 ## Acknowledgements
-- This project was inspired by [JELVIS](https://githu[Ross.txt](https://github.com/0ne-zero/Emma_Audio_Assistant/files/8153087/Ross.txt).com/kiahamedi/JELVIS)
+- This project was inspired by [JELVIS](https://github.com/kiahamedi/JELVIS)
 - Thanks to Iron-Man
 
 

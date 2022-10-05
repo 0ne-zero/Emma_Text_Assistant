@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+from ast import literal_eval
+from email.policy import default
 from genericpath import isdir
 from io import BytesIO
 import logging
@@ -67,8 +69,9 @@ class Core():
             *If you don't have custom learn file or brain file, leave brain_file,learn_files,commands,chdir arguments alone.
         '''
         self.__increment_instance_count()
+        # Variables aren't private because states need them
         # Create core global variable store
-        self.global_vars = GlobalStore()
+        self.global_store = GlobalStore()
         log_directory = './log/logfile.txt'
         self.speak_lang = 'en'
         self.ping_counter = 0
@@ -81,7 +84,6 @@ class Core():
         self.ping_counter = 0
         self.running = True
         self.previous_state_name = ''
-        # They aren't private because states need them
         self.state = default_state
         self.input: dict = {"text": "", "lang": ""}
         self.output: dict = {"text": "", "lang": self.speak_lang}
@@ -105,8 +107,7 @@ class Core():
             self.__infity_loop(break_after=1)
         # Infity thread
 
-
-        self.global_vars.set('__os_name',system())
+        self.global_vars.set('__os_name', system())
         self.global_vars.set('__using_thread', use_thread)
         self.global_vars.set('__verbose', versobe)
 
@@ -114,10 +115,11 @@ class Core():
         self.global_vars.set('__all_states', state.all_states())
         # bootstrap logger
         if save_log:
-            self.__logger: logging = self.__bootstraping_logger(log_directory,log_level)
+            self.__logger: logging = self.__bootstraping_logger(
+                log_directory, log_level)
     # region private methods
 
-    def __bootstraping_logger(self, log_file_location: str,log_level=logging.NOTSET):
+    def __bootstraping_logger(self, log_file_location: str, log_level=logging.NOTSET):
         log_file_location.strip()
         if log_file_location != '':
             if not path.isdir(path.dirname(log_file_location)):
@@ -163,7 +165,7 @@ class Core():
 
         self.global_vars.set('__internet_connection', status)
 
-    def __infity_loop(self,break_after=0):
+    def __infity_loop(self, break_after=0):
         '''
         this mehtod is a loop for check things (like internet connection
         infinity loop; if break_after is none-zero it will break loop after the number of break_after runed.
@@ -211,7 +213,7 @@ class Core():
             gtts = gTTS(text, lang=lang)
             gtts.write_to_fp(mem_file)
             audio_bytes = bytearray(mem_file.getvalue())
-        
+
         del mem_file
         if self.save_audio:
             # Path of file for save it, file name is sha256 of text and lang
@@ -220,8 +222,9 @@ class Core():
             # Make audio directory if doesn't exists
             if not path.exists(self.audio_directory):
                 mkdir(self.audio_directory)
-            
-            audio_path = self.audio_directory + utilities.generate_hash_sha256(text,lang) + '.mp3'
+
+            audio_path = self.audio_directory + \
+                utilities.generate_hash_sha256(text, lang) + '.mp3'
             with open(audio_path, 'wb') as f:
                 f.write(audio_bytes)
         # Play audio
@@ -245,10 +248,10 @@ class Core():
 
     # region public methods
     def get_global_var(self, k: str):
-        return self.global_vars.get(k)
+        return self.global_store.get(k)
 
     def set_global_var(self, k: str, v):
-        self.global_vars.set(k, v)
+        self.global_store.set(k, v)
 
     def listen(self):
         '''listen from microphone for get input/command for execute'''
@@ -297,7 +300,8 @@ class Core():
 
         if output_text.strip() != '' and re.sub('[^\w]', '', output_text.strip()) != '':
             # All previously saved audio
-            saved_audios_name = getoutput(f'ls {self.audio_directory}').splitlines()
+            saved_audios_name = getoutput(
+                f'ls {self.audio_directory}').splitlines()
 
             # The name of the audio files is sha256 their text and language code (with .mp3)
             # sha256 of output text and output lang
@@ -318,24 +322,26 @@ class Core():
                 else:
                     self.__speak_pyttsx3(output_text)
 
-    def log(self, msg, level="DEBUG"):
-        try:
-            if msg:
-                if not level.isupper():
-                    level = level.upper()
-            if level == 'DEBUG':
-                self.__logger.debug(msg)
-            elif level == 'INFO':
-                self.__logger.info(msg)
-            elif level == 'WARNING':
-                self.__logger.warning(msg)
-            elif level == 'ERROR':
-                self.__logger.error(msg)
-            elif level == 'CRITICAL':
-                self.__logger.critical(msg)
+    def log(self, msg, level="DEBUG") -> bool:
+        if msg:
+            if not level.isupper():
+                level = level.upper()
+            match level:
+                case "DEBUG":
+                    self.__logger.debug(msg)
+                case "INFO":
+                    self.__logger.info(msg)
+                case "WARNING":
+                    self.__logger.warning(msg)
+                case "ERROR":
+                    self.__logger.error(msg)
+                case "CRITICAL":
+                    self.__logger.critical(msg)
+                case _:
+                    return False
+                
             return True
-        except:
-            return False
+        return False
 
     def processing(self):
         # It's true just for going to while loop

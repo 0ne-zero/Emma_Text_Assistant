@@ -26,22 +26,19 @@ def all_states():
             )
     return operations_class
 
-# return response when context's state changed: done
-# listening state and text state
 
 
 class IState(ABC):
-    _context = None
-    # abstracts
+    _context = None    
+    @abstractmethod
+    def _input_processing(self) -> IOperation:
+        pass
 
     @abstractmethod
     def processing(self, context):
         pass
 
-    @abstractmethod
-    def _input_processing(self) -> IOperation:
-        pass
-
+ 
     @abstractmethod
     def _perform_processing(self, op) -> None:
         pass
@@ -68,8 +65,6 @@ class IState(ABC):
     @abstractmethod
     def _get_input(self):
         pass
-
-    # protected
 
     def _check_state_change(self):
         return self._state_out_checker()

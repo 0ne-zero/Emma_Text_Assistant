@@ -1,4 +1,3 @@
-from __future__ import nested_scopes
 from abc import ABC, abstractmethod
 import ast
 import datetime
@@ -23,6 +22,40 @@ from googletrans import Translator
 from datetime import datetime
 from langid import classify
 from jokeapi import Jokes
+
+
+
+
+class IOperation(ABC):
+    @abstractmethod
+    def checker(input):
+        '''this should be a static method'''
+        pass
+
+    @abstractmethod
+    def action(self):
+        # validate conditions for running action
+        # if there is something unvalidate raise an error
+        self.__before_action_validate()
+
+    @abstractmethod
+    def input_extractor(self, input):
+        pass
+
+    def __is_input_extracted(self):
+        if not hasattr(self, 'input_extracted'):
+            return False
+        return self.input_extracted
+
+    def _set_input_extracted_true(self):
+        self.input_extracted = True
+
+    def __before_action_validate(self):
+        if hasattr(type(self), 'need_input'):
+            if type(self).need_input == True:
+                if not self.__is_input_extracted():
+                    raise Exception(
+                        "You should call input_extractor before action")
 
 
 def all_operations():
@@ -58,37 +91,6 @@ def __needs_input(cls):
     cls.need_input = True
     return cls
 
-
-class IOperation(ABC):
-    @abstractmethod
-    def checker(input):
-        '''this should be a static method'''
-        pass
-
-    @abstractmethod
-    def action(self):
-        # validate conditions for running action
-        # if there is something unvalidate raise an error
-        self.__before_action_validate()
-
-    @abstractmethod
-    def input_extractor(self, input):
-        pass
-
-    def __is_input_extracted(self):
-        if not hasattr(self, 'input_extracted'):
-            return False
-        return self.input_extracted
-
-    def _set_input_extracted_true(self):
-        self.input_extracted = True
-
-    def __before_action_validate(self):
-        if hasattr(type(self), 'need_input'):
-            if type(self).need_input == True:
-                if not self.__is_input_extracted():
-                    raise Exception(
-                        "You should call input_extractor before action")
 
 
 @__needs_core

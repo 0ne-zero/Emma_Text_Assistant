@@ -94,7 +94,7 @@ class Core():
         __aiml_kernel.verbose(isVerbose=False)
         # Set aiml kernel name
         __aiml_kernel.setBotPredicate('name', 'Emma')
-        self.global_vars.set("__aiml_kernel", __aiml_kernel)
+        self.global_store.set("__aiml_kernel", __aiml_kernel)
 
         # bootstraping aiml
         if use_thread:
@@ -107,12 +107,12 @@ class Core():
             self.__infity_loop(break_after=1)
         # Infity thread
 
-        self.global_vars.set('__os_name', system())
-        self.global_vars.set('__using_thread', use_thread)
-        self.global_vars.set('__verbose', versobe)
+        self.global_store.set('__os_name', system())
+        self.global_store.set('__using_thread', use_thread)
+        self.global_store.set('__verbose', versobe)
 
-        self.global_vars.set('__all_operations', operation.all_operations())
-        self.global_vars.set('__all_states', state.all_states())
+        self.global_store.set('__all_operations', operation.all_operations())
+        self.global_store.set('__all_states', state.all_states())
         # bootstrap logger
         if save_log:
             self.__logger: logging = self.__bootstraping_logger(
@@ -136,7 +136,7 @@ class Core():
     def __bootstraping_aiml_kernel(self, brainFile, learnFiles, commands):
         '''load aiml brain, if not exist load learn files. (bootstraping aiml kerne)'''
         # get aiml kernel
-        kernel = self.global_vars.get("__aiml_kernel")
+        kernel = self.global_store.get("__aiml_kernel")
 
         # load brain file if exist
         if path.isfile(brainFile):
@@ -149,7 +149,7 @@ class Core():
             kernel.bootstrap(
                 learnFiles=learnFiles, commands=commands)
             kernel.saveBrain("aiml/brain.brn")
-        self.global_vars.set('__is_aiml_kernel_loaded', True)
+        self.global_store.set('__is_aiml_kernel_loaded', True)
 
     def __check_internet_connection(self):
         '''internet connection checking'''
@@ -163,7 +163,7 @@ class Core():
                 if g_dns != 0:
                     status = False
 
-        self.global_vars.set('__internet_connection', status)
+        self.global_store.set('__internet_connection', status)
 
     def __infity_loop(self, break_after=0):
         '''
@@ -264,7 +264,7 @@ class Core():
             print("I'm listening...")
             audio = r.listen(source)
 
-        if self.global_vars.get('__internet_connection'):
+        if self.global_store.get('__internet_connection'):
             audio_text = r.recognize_google(audio)
         else:
             audio_text = r.recognize_sphinx(audio)
@@ -316,7 +316,7 @@ class Core():
                 playsound(f'{self.audio_directory}{output_sha256}.mp3')
             else:
                 # If there is internet connection
-                if self.global_vars.get('__internet_connection'):
+                if self.global_store.get('__internet_connection'):
                     # Get output audio from google text to speech
                     self.__speak_gtts(output_text, output_lang)
                 else:

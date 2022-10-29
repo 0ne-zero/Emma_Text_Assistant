@@ -8,7 +8,7 @@ class Emma():
 
     __instance_count: int = 0
 
-    def __init__(self, default_state=TextState(), aiml_brain_file="./aiml/brain.brn",
+    def __init__(self, default_state=HalfAudioState(), aiml_brain_file="./aiml/brain.brn",
                  aiml_learn_files=['./aiml/learn.aiml', ], aiml_commands=['LOAD AIML', ],
                  save_audio=True, audio_directory="./audios/", save_log=True, log_directory='/var/log/emma/',
                  log_level='DEBUG', use_thread=True, versobe=False) -> None:

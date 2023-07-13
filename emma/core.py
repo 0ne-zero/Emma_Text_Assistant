@@ -19,13 +19,13 @@ from threading import Thread
 import aiml
 import pyttsx3
 
-import operation
-from global_store import GlobalStore
-import state
-import utilities
+from emma import operation
+from emma.global_store import GlobalStore
+from emma import state
+from emma import utilities
 from gtts import gTTS
 from playsound import playsound
-from state import IState, TextState
+from emma.state import IState, TextState
 
 
 class Core():
@@ -246,7 +246,7 @@ class Core():
         self.__class__.__instance_count -= 1
     # endregion
 
-    # region public methods
+    # sfsregion public methods
     def get_global_var(self, k: str):
         return self.global_store.get(k)
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-from core import Core
-from state import AudioState, HalfAudioState, StopState, TextState
+from .core import Core
+from .state import AudioState, HalfAudioState, StopState, TextState
 
 
 class Emma():
@@ -24,8 +24,3 @@ class Emma():
         '''Input processing and performing the input request and display the final output'''
 
         self.core.processing()
-
-
-emma = Emma()
-while(1):
-    emma.processing()

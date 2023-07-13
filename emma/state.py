@@ -9,8 +9,8 @@ from playsound import playsound
 from hashlib import sha256
 from colorama import Fore, Style
 
-from utilities import upper_first_letter
-from operation import *
+from emma.utilities import upper_first_letter
+from emma.operation import *
 INITIATED = False
 
 

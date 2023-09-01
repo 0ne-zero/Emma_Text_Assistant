@@ -35,7 +35,7 @@ $ cd ./Emma_Audio_Assistant/
 $ virtualenv venv
 $ source venv/bin/activate
 $ pip3 install -r requirements.txt
-$ python3   emma/assistant.py
+$ python3   ./main.py
 ```
 
 ## Project Status

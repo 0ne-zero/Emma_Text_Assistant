@@ -37,9 +37,6 @@ $ pip3 install -r requirements.txt
 $ python3   ./main.py
 ```
 
-## Project Status
-- Project is: _in progress_
-
 ## Acknowledgements
 - This project was inspired by [JELVIS](https://github.com/kiahamedi/JELVIS)
 - Thanks to Iron-Man

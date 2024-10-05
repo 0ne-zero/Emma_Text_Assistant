@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-from ast import literal_eval
-from email.policy import default
-from genericpath import isdir
 from io import BytesIO
 import logging
 from os import mkdir, path, makedirs, system
 from platform import system
 import re
-from shutil import ExecError
 from subprocess import getoutput
 import os
-import sys
 from time import sleep
 import aiml
 import speech_recognition as sr
@@ -115,8 +110,7 @@ class Core():
         self.global_store.set('__all_states', state.all_states())
         # bootstrap logger
         if save_log:
-            self.__logger: logging = self.__bootstraping_logger(
-                log_directory, log_level)
+            self.__logger: logging.Logger = self.__bootstraping_logger(log_directory, log_level)  # type: ignore
     # region private methods
 
     def __bootstraping_logger(self, log_file_location: str, log_level=logging.NOTSET):
@@ -339,7 +333,7 @@ class Core():
                     self.__logger.critical(msg)
                 case _:
                     return False
-                
+
             return True
         return False
 

@@ -3,7 +3,6 @@ import ast
 import datetime
 import os
 from platform import system as get_os_name
-from random import randint
 import random
 from time import sleep
 from subprocess import getoutput
@@ -22,8 +21,6 @@ from googletrans import Translator
 from datetime import datetime
 from langid import classify
 from jokeapi import Jokes
-
-
 
 
 class IOperation(ABC):
@@ -90,7 +87,6 @@ def __needs_input(cls):
     '''decorator for operations need to input for their action'''
     cls.need_input = True
     return cls
-
 
 
 @__needs_core
@@ -187,7 +183,7 @@ class ShutDownSystem(IOperation):
 @__needs_input
 @__needs_core
 class CreateDirectory(IOperation):
-    def action(self,core):
+    def action(self, core):
         super().action()
 
         result = False
@@ -263,7 +259,7 @@ class CreateDirectory(IOperation):
                             del drives_list[i]
                     # putting \ in end of the first element of location_words
                     if location_words[0].upper() in drives_list:
-                        location_words[0] = f'{location_words[0]}:\ '.strip()
+                        location_words[0] = f'{location_words[0]}:\\'.strip()
 
                     # filling inputs['location']
                     counter = 0
@@ -271,7 +267,7 @@ class CreateDirectory(IOperation):
                         if counter == 0:
                             inputs['location'] += word
                         else:
-                            inputs['location'] += f"{word}\ ".strip()
+                            inputs['location'] += f"{word}\\".strip()
                         counter += 1
 
         # detect directory name
@@ -293,9 +289,10 @@ class CreateDirectory(IOperation):
                 return True
         return False
 
+
 @__needs_core
 class CancleShutdownSystem(IOperation):
-    def action(self,core):
+    def action(self, core):
         '''cancel shutdowning system'''
         super().action()
         os_name = core.get_global_var("__os_name")
@@ -352,7 +349,7 @@ class GetDistributionName(IOperation):
 
     def checker(input):
         get_distro_keywords = (
-            'get distro name', 'this is what kind of linux','get distribution name')
+            'get distro name', 'this is what kind of linux', 'get distribution name')
         for item in get_distro_keywords:
             if input == item:
                 return True
@@ -360,6 +357,7 @@ class GetDistributionName(IOperation):
 
     def input_extractor(self, input):
         self._set_input_extracted_true()
+
 
 @__needs_core
 class GetDistributionVersion(IOperation):
@@ -373,7 +371,7 @@ class GetDistributionVersion(IOperation):
 
     def checker(input):
         get_distro_keywords = (
-            'get distro version','get distribution version'
+            'get distro version', 'get distribution version'
         )
         for item in get_distro_keywords:
             if input == item:
@@ -382,6 +380,7 @@ class GetDistributionVersion(IOperation):
 
     def input_extractor(self, input):
         self._set_input_extracted_true()
+
 
 @__needs_core
 class GetDistributionInfo(IOperation):
@@ -395,7 +394,7 @@ class GetDistributionInfo(IOperation):
 
     def checker(input):
         get_distro_keywords = (
-            'this is what kind of linux','get distro info',
+            'this is what kind of linux', 'get distro info',
             'get distribution information',
             'get distribution info')
         for item in get_distro_keywords:
@@ -406,9 +405,10 @@ class GetDistributionInfo(IOperation):
     def input_extractor(self, input):
         self._set_input_extracted_true()
 
+
 @__needs_core
 class RebootSystem(IOperation):
-    def action(self,core):
+    def action(self, core):
         '''rebooting system'''
         super().action()
         os_name = core.get_global_var("__os_name")
@@ -688,7 +688,7 @@ class ShowDate(IOperation):
 @__needs_internet_connection
 @__needs_core
 class Ping(IOperation):
-    def action(self,core):
+    def action(self, core):
         super().action()
         param = '-n' if core.get_global_var('__os_name') == 'Windows' else '-c'
         output = getoutput(f'ping {param} 1 {self.server}')
